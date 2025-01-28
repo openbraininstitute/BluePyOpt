@@ -7,7 +7,7 @@ on:
 
 jobs:
   call-test-workflow:
-    uses: BlueBrain/BluePyOpt/.github/workflows/test.yml@master
+    uses: openbraininstitute/BluePyOpt/.github/workflows/test.yml@master
   
   keep-workflow-alive:
     name: Keep workflow alive
