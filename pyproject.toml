@@ -47,10 +47,10 @@ lfpy = ["LFPy>=2.3"]
 arbor = ["arbor>=0.10"]
 
 [project.urls]
-Homepage = "https://github.com/BlueBrain/BluePyOpt"
-Source = "https://github.com/BlueBrain/BluePyOpt"
-Repository = "https://github.com/BlueBrain/BluePyOpt.git"
-Tracker = "https://github.com/BlueBrain/BluePyOpt/issues"
+Homepage = "https://github.com/openbraininstitute/BluePyOpt"
+Source = "https://github.com/openbraininstitute/BluePyOpt"
+Repository = "https://github.com/openbraininstitute/BluePyOpt.git"
+Tracker = "https://github.com/openbraininstitute/BluePyOpt/issues"
 Documentation = "https://bluepyopt.readthedocs.io/en/latest"
 
 [project.scripts]
