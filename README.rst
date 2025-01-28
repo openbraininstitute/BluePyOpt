@@ -62,21 +62,21 @@ When you use the BluePyOpt software or method for your research, we ask you to c
 
 Publications that use or mention BluePyOpt
 ==========================================
-The list of publications that use or mention BluePyOpt can be found on `the github wiki page <https://github.com/BlueBrain/BluePyOpt/wiki/Publications-that-use-or-mention-BluePyOpt>`_.
+The list of publications that use or mention BluePyOpt can be found on `the github wiki page <https://github.com/openbraininstitute/BluePyOpt/wiki/Publications-that-use-or-mention-BluePyOpt>`_.
 
 Support
 =======
-We are providing support using a chat channel on `Gitter <https://gitter.im/BlueBrain/BluePyOpt>`_, or the `Github discussion page <https://github.com/BlueBrain/BluePyOpt/discussions>`_.
+We are providing support using a chat channel on `Gitter <https://gitter.im/openbraininstitute/BluePyOpt>`_, or the `Github discussion page <https://github.com/openbraininstitute/BluePyOpt/discussions>`_.
 
 News
 ====
 - 2023/01: BluePyOpt now supports the Arbor simulator.
 - 2022/12: Support for LFPy models merged into master. Examples and preprint: https://github.com/alejoe91/multimodalfitting, https://www.biorxiv.org/content/10.1101/2022.08.03.502468v1.full
-- 2022/12: BluePyOpt now has the ability to write out NeuroML files: https://github.com/BlueBrain/BluePyOpt/tree/master/bluepyopt/neuroml
+- 2022/12: BluePyOpt now has the ability to write out NeuroML files: https://github.com/openbraininstitute/BluePyOpt/tree/master/bluepyopt/neuroml
 - 2021/08/30: BluePyOpt dropped Python 2.7 support.
 - 2017/01/04: BluePyOpt is now considered compatible with Python 3.6+.
 - 2016/11/10: BluePyOpt now supports NEURON point processes. This means we can fit parameters of Adex/GIF/Izhikevich models, and also synapse models.
-- 2016/06/14: Started a wiki: https://github.com/BlueBrain/BluePyOpt/wiki
+- 2016/06/14: Started a wiki: https://github.com/openbraininstitute/BluePyOpt/wiki
 - 2016/06/07: The BluePyOpt paper was published in Frontiers in Neuroinformatics (for link, see above)
 - 2016/05/03: The API documentation was moved to `ReadTheDocs <http://bluepyopt.readthedocs.io/en/latest/>`_
 - 2016/04/20: BluePyOpt now contains the code of the IBEA selector, no need to install a BBP-specific version of DEAP anymore
@@ -88,7 +88,7 @@ Requirements
 * `Python 3.9+ <https://www.python.org/downloads/release/python-390/>`_
 * `Pip <https://pip.pypa.io>`_ (installed by default in newer versions of Python)
 * `Neuron 7.4+ <http://neuron.yale.edu/>`_ (compiled with Python support)
-* `eFEL eFeature Extraction Library <https://github.com/BlueBrain/eFEL>`_ (automatically installed by pip)
+* `eFEL eFeature Extraction Library <https://github.com/openbraininstitute/eFEL>`_ (automatically installed by pip)
 * `Numpy <http://www.numpy.org>`_ (automatically installed by pip)
 * `Pandas <http://pandas.pydata.org/>`_ (automatically installed by pip)
 * The instruction below are written assuming you have access to a command shell on Linux / UNIX / MacOSX / Cygwin
@@ -116,7 +116,7 @@ Cloud infrastructure
 
 We provide instructions on how to set up an optimisation environment on cloud
 infrastructure or cluster computers
-`here <https://github.com/BlueBrain/BluePyOpt/tree/master/cloud-config>`_
+`here <https://github.com/openbraininstitute/BluePyOpt/tree/master/cloud-config>`_
 
 Quick Start
 ===========
@@ -127,8 +127,8 @@ Single compartmental model
 An iPython notebook with an introductory optimisation of a one compartmental
 model with 2 HH channels can be found at
 
-https://github.com/BlueBrain/BluePyOpt/blob/master/examples/simplecell/simplecell.ipynb (NEURON)
-https://github.com/BlueBrain/BluePyOpt/blob/master/examples/simplecell/simplecell_arbor.ipynb (Arbor)
+https://github.com/openbraininstitute/BluePyOpt/blob/master/examples/simplecell/simplecell.ipynb (NEURON)
+https://github.com/openbraininstitute/BluePyOpt/blob/master/examples/simplecell/simplecell_arbor.ipynb (Arbor)
 
 
 |landscape_example|
@@ -139,39 +139,39 @@ https://github.com/BlueBrain/BluePyOpt/blob/master/examples/simplecell/simplecel
 Neocortical Layer 5 Pyramidal Cell
 ----------------------------------
 Scripts for a more complex neocortical L5PC are in
-`this directory <https://github.com/BlueBrain/BluePyOpt/tree/master/examples/l5pc>`__
+`this directory <https://github.com/openbraininstitute/BluePyOpt/tree/master/examples/l5pc>`__
 
 With a notebook:
 
-https://github.com/BlueBrain/BluePyOpt/blob/master/examples/l5pc/L5PC.ipynb (NEURON)
-https://github.com/BlueBrain/BluePyOpt/blob/master/examples/l5pc/L5PC_arbor.ipynb (Arbor)
+https://github.com/openbraininstitute/BluePyOpt/blob/master/examples/l5pc/L5PC.ipynb (NEURON)
+https://github.com/openbraininstitute/BluePyOpt/blob/master/examples/l5pc/L5PC_arbor.ipynb (Arbor)
 
 Thalamocortical Cells
 ---------------------
 Scripts for 2 thalamocortical cell types are in
-`this directory <https://github.com/BlueBrain/BluePyOpt/tree/master/examples/thalamocortical-cell>`__
+`this directory <https://github.com/openbraininstitute/BluePyOpt/tree/master/examples/thalamocortical-cell>`__
 
 With a notebook:
 
-https://github.com/BlueBrain/BluePyOpt/blob/master/examples/thalamocortical-cell/thalamocortical-cell_opt.ipynb
+https://github.com/openbraininstitute/BluePyOpt/blob/master/examples/thalamocortical-cell/thalamocortical-cell_opt.ipynb
 
 
 Tsodyks-Markram Model of Short-Term Plasticity
 ----------------------------------------------
 Scripts for 2 version of fitting the Tsodyks-Markram model to synaptic traces are in
-`this directory <https://github.com/BlueBrain/BluePyOpt/tree/master/examples/tsodyksmarkramstp>`__
+`this directory <https://github.com/openbraininstitute/BluePyOpt/tree/master/examples/tsodyksmarkramstp>`__
 
 With 2 notebooks:
 
-https://github.com/BlueBrain/BluePyOpt/blob/master/examples/tsodyksmarkramstp/tsodyksmarkramstp.ipynb
-https://github.com/BlueBrain/BluePyOpt/blob/master/examples/tsodyksmarkramstp/tsodyksmarkramstp_multiplefreqs.ipynb
+https://github.com/openbraininstitute/BluePyOpt/blob/master/examples/tsodyksmarkramstp/tsodyksmarkramstp.ipynb
+https://github.com/openbraininstitute/BluePyOpt/blob/master/examples/tsodyksmarkramstp/tsodyksmarkramstp_multiplefreqs.ipynb
 
 Exporting cell in neuroml format
 --------------------------------
 An iPython notebook showing how to export a BluePyOpt cell in the neuroml format, how to create a LEMS simulation,
 and how to run the LEMS simulation with the neuroml cell can be found at:
 
-https://github.com/BlueBrain/BluePyOpt/blob/master/examples/neuroml/neuroml.ipynb
+https://github.com/openbraininstitute/BluePyOpt/blob/master/examples/neuroml/neuroml.ipynb
 
 
 API documentation
@@ -202,20 +202,20 @@ Copyright (c) 2025 Open Brain Institute
                :alt: latest documentation
 
 .. |license| image:: https://img.shields.io/pypi/l/bluepyopt.svg
-                  :target: https://github.com/BlueBrain/bluepyopt/blob/master/LICENSE.txt
+                  :target: https://github.com/openbraininstitute/bluepyopt/blob/master/LICENSE.txt
                   :alt: license
 
-.. |build| image:: https://github.com/BlueBrain/BluePyOpt/workflows/Build/badge.svg?branch=master
-                :target: https://github.com/BlueBrain/BluePyOpt/actions
+.. |build| image:: https://github.com/openbraininstitute/BluePyOpt/workflows/Build/badge.svg?branch=master
+                :target: https://github.com/openbraininstitute/BluePyOpt/actions
                 :alt: actions build status
 
-.. |coverage| image:: https://codecov.io/github/BlueBrain/BluePyOpt/coverage.svg?branch=master
-                   :target: https://codecov.io/gh/BlueBrain/bluepyopt
+.. |coverage| image:: https://codecov.io/github/openbraininstitute/BluePyOpt/coverage.svg?branch=master
+                   :target: https://codecov.io/gh/openbraininstitute/bluepyopt
                    :alt: coverage
 
 .. |gitter| image:: https://badges.gitter.im/Join%20Chat.svg
-                 :target: https://gitter.im/BlueBrain/blueptopt
-                 :alt: Join the chat at https://gitter.im/BlueBrain/BluePyOpt
+                 :target: https://gitter.im/openbraininstitute/blueptopt
+                 :alt: Join the chat at https://gitter.im/openbraininstitute/BluePyOpt
 
 .. |zenodo| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.8135890.svg
                 :target: https://doi.org/10.5281/zenodo.8135890
