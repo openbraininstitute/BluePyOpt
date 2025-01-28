@@ -14,9 +14,8 @@ jobs:
         os: [ubuntu-latest]
         python-version: ["3.9", "3.10", "3.11", "3.12"]
         include:
-          - os: macos-latest
+          - os: macos-13
             python-version: "3.12"
-            arch: x86_64
 
     steps:
     - uses: actions/checkout@v3
