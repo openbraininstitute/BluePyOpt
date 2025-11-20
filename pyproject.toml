@@ -10,7 +10,7 @@ authors = [
 description="Blue Brain Python Optimisation Library (bluepyopt)"
 readme = "README.rst"
 license = {file = "LICENSE.txt"}
-requires-python = ">= 3.9"
+requires-python = ">= 3.10"
 dynamic = ["version"]
 dependencies = [
     "numpy>=1.6",
