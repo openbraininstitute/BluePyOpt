@@ -160,7 +160,7 @@ def test_parameterscalers_iexpr():
     # bluepyopt/tests/test_ephys/testdata/acc/simplecell/simple_cell_decor.acc
     simple_cell_decor_with_iexpr = \
         '(arbor-component\n' \
-        '  (meta-data (version "0.9-dev"))\n' \
+        '  (meta-data (version "0.10-dev"))\n' \
         '  (decor\n' \
         '    (paint (region "soma") ' \
         '(membrane-capacitance 0.01 (scalar 1.0)))\n' \
