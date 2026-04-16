@@ -26,9 +26,21 @@ sys.path.insert(0, L5PC_PATH)
 
 neuron_sim = ephys.simulators.NrnSimulator()
 
-neuron_sim.neuron.h.nrn_load_dll(
-    os.path.join(L5PC_PATH, "x86_64/.libs/libnrnmech.so")
-)
+def _find_mech_lib(base_path):
+    """Find compiled NEURON mechanism library across arch dirs and filenames."""
+    for arch in ("x86_64", "arm64", "aarch64"):
+        for subdir, name in (
+            (".libs", "libnrnmech.so"),
+            ("", "libnrnmech.so"),
+            ("", "libnrnmech.dylib"),
+        ):
+            candidate = os.path.join(base_path, arch, subdir, name)
+            if os.path.exists(candidate):
+                return candidate
+    raise FileNotFoundError(f"Could not find libnrnmech in {base_path}")
+
+
+neuron_sim.neuron.h.nrn_load_dll(_find_mech_lib(L5PC_PATH))
 
 
 # Parameters in release circuit model
