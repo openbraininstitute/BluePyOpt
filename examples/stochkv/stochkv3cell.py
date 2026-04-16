@@ -87,7 +87,8 @@ def run_stochkv3_model(deterministic=False):
 
     protocol = ephys.protocols.SweepProtocol('Step', [stim, hold_stim], [rec])
 
-    nrn = ephys.simulators.NrnSimulator(cvode_active=False)
+    nrn = ephys.simulators.NrnSimulator(
+        cvode_active=False, mechanisms_directory=script_dir)
 
     evaluator = ephys.evaluators.CellEvaluator(
         cell_model=stochkv3_cell,
