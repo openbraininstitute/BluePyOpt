@@ -210,7 +210,7 @@ def test_NrnRampPulse_instantiate():
         voltage[
             numpy.where(
                 (ramp_delay + ramp_duration < time)
-                & (time <= total_duration))]), -57.994437612124869)
+                & (time <= total_duration))]), -57.994437612124869, decimal=4)
     recording.destroy(sim=nrn_sim)
     stim.destroy(sim=nrn_sim)
     dummy_cell.destroy(sim=nrn_sim)

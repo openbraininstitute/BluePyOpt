@@ -148,7 +148,10 @@ def create(feature_file="extra_features.json", cvode_active=True, dt=None):
         param.name for param in l5pc_cell.params.values() if not param.frozen
     ]
 
-    lfpy_sim = ephys.simulators.LFPySimulator(cvode_active=cvode_active, dt=dt)
+    l5pc_dir = str(pathlib.Path(__file__).parents[1] / "l5pc")
+
+    lfpy_sim = ephys.simulators.LFPySimulator(
+        cvode_active=cvode_active, dt=dt, mechanisms_directory=l5pc_dir)
 
     return ephys.evaluators.CellEvaluator(
         cell_model=l5pc_cell,

@@ -195,7 +195,8 @@ def create(do_replace_axon=True, sim='nrn'):
                    if not param.frozen]
 
     if sim == 'nrn':
-        simulator = ephys.simulators.NrnSimulator()
+        simulator = ephys.simulators.NrnSimulator(
+            mechanisms_directory=script_dir)
     elif sim == 'arb':
         simulator = ephys.simulators.ArbSimulator()
         if do_replace_axon:

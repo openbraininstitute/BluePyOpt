@@ -24,26 +24,7 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, L5PC_PATH)
 
 
-neuron_sim = ephys.simulators.NrnSimulator()
-
-
-def _find_mech_lib(base_path):
-    """Find compiled NEURON mechanism library."""
-    for arch in ("x86_64", "arm64", "aarch64"):
-        for subdir, name in (
-            (".libs", "libnrnmech.so"),
-            ("", "libnrnmech.so"),
-            ("", "libnrnmech.dylib"),
-        ):
-            candidate = os.path.join(
-                base_path, arch, subdir, name)
-            if os.path.exists(candidate):
-                return candidate
-    raise FileNotFoundError(
-        "Could not find libnrnmech in %s" % base_path)
-
-
-neuron_sim.neuron.h.nrn_load_dll(_find_mech_lib(L5PC_PATH))
+neuron_sim = ephys.simulators.NrnSimulator(mechanisms_directory=L5PC_PATH)
 
 
 # Parameters in release circuit model
@@ -104,7 +85,8 @@ class TestL5PCModel(object):
 
         self.l5pc_cell = l5pc_model.create()
         assert isinstance(self.l5pc_cell, bluepyopt.ephys.models.CellModel)
-        self.nrn = ephys.simulators.NrnSimulator()
+        self.nrn = ephys.simulators.NrnSimulator(
+            mechanisms_directory=L5PC_PATH)
 
     def test_instantiate(self):
         """L5PC: test instantiation of l5pc cell model"""
