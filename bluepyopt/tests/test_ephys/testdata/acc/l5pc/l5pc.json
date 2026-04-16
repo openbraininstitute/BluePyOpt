@@ -1,6 +1,6 @@
-{ 
+{
   "cell_model_name": "l5pc",
-  "produced_by": "Created by BluePyOpt(1.12.113) at 2022-11-06 18:21:20.822883", 
+  "produced_by": "Created by BluePyOpt(1.14.19.dev2) at 2026-04-16 09:46:59.248761",
   "morphology": {
      "original": "C060114A7.asc",
      "replace_axon": "C060114A7_axon_replacement.acc",
