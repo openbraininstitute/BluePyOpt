@@ -113,8 +113,11 @@ class DummyLFPyCellModel1(ephys.models.Model):
         self.persistent.append(self.icell)
         self.persistent.append(self.icell.soma[0])
 
+        morph_sl = sim.neuron.h.SectionList()
+        for sec in sim.neuron.h.allsec():
+            morph_sl.append(sec=sec)
         self.lfpy_cell = LFPy.Cell(
-            morphology=sim.neuron.h.allsec(),
+            morphology=morph_sl,
             dt=0.025,
             v_init=-65,
             pt3d=True,

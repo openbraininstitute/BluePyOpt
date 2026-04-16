@@ -775,8 +775,11 @@ class LFPyCellModel(Model):
 
         self.morphology.instantiate(sim=sim, icell=self.icell)
 
+        morph_sl = sim.neuron.h.SectionList()
+        for sec in sim.neuron.h.allsec():
+            morph_sl.append(sec=sec)
         self.lfpy_cell = Cell(
-            morphology=sim.neuron.h.allsec(),
+            morphology=morph_sl,
             dt=self.dt,
             v_init=self.v_init,
             pt3d=True,
