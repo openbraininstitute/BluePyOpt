@@ -78,8 +78,14 @@ clean:
 	rm -rf examples/l5pc/l5pc_validate_neuron_arbor_somatic.ipynb
 	rm -rf examples/l5pc/l5pc_validate_neuron_arbor_somatic.py
 	rm -rf examples/l5pc/x86_64
+	rm -rf examples/l5pc/arm64
+	rm -rf examples/l5pc/aarch64
 	rm -rf examples/stochkv/x86_64
+	rm -rf examples/stochkv/arm64
+	rm -rf examples/stochkv/aarch64
 	rm -rf x86_64
+	rm -rf arm64
+	rm -rf aarch64
 	rm -rf .coverage
 	rm -rf coverage.xml
 	rm -rf channels
