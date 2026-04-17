@@ -45,10 +45,10 @@ When you use the BluePyOpt software or method for your research, we ask you to c
 
 `Van Geit W, Gevaert M, Chindemi G, Rössert C, Courcol J, Muller EB, Schürmann F, Segev I and Markram H (2016). BluePyOpt: Leveraging open source software and cloud infrastructure to optimise model parameters in neuroscience. Front. Neuroinform. 10:17. doi: 10.3389/fninf.2016.00017 <http://journal.frontiersin.org/article/10.3389/fninf.2016.00017>`_.
 
-.. code-block:: 
+.. code-block::
 
 	@ARTICLE{bluepyopt,
-	AUTHOR={Van Geit, Werner  and  Gevaert, Michael  and  Chindemi, Giuseppe  and  Rössert, Christian  and  Courcol, Jean-Denis  and  Muller, Eilif Benjamin  and  Schürmann, Felix  and  Segev, Idan  and  Markram, Henry},   
+	AUTHOR={Van Geit, Werner  and  Gevaert, Michael  and  Chindemi, Giuseppe  and  Rössert, Christian  and  Courcol, Jean-Denis  and  Muller, Eilif Benjamin  and  Schürmann, Felix  and  Segev, Idan  and  Markram, Henry},
 	TITLE={BluePyOpt: Leveraging open source software and cloud infrastructure to optimise model parameters in neuroscience},
 	JOURNAL={Frontiers in Neuroinformatics},
 	VOLUME={10},
@@ -188,10 +188,10 @@ Copyright (c) 2016-2024 Blue Brain Project/EPFL
 Copyright (c) 2025 Open Brain Institute
 
 ..
-    The following image is also defined in the index.rst file, as the relative path is 
+    The following image is also defined in the index.rst file, as the relative path is
     different, depending from where it is sourced.
     The following location is used for the github README
-    The index.rst location is used for the docs README; index.rst also defined an end-marker, 
+    The index.rst location is used for the docs README; index.rst also defined an end-marker,
     to skip content after the marker 'substitutions'.
 
 .. |pypi| image:: https://img.shields.io/pypi/v/bluepyopt.svg
@@ -218,8 +218,8 @@ Copyright (c) 2025 Open Brain Institute
                  :target: https://gitter.im/openbraininstitute/blueptopt
                  :alt: Join the chat at https://gitter.im/openbraininstitute/BluePyOpt
 
-.. |zenodo| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.8135890.svg
-                :target: https://doi.org/10.5281/zenodo.8135890
+.. |zenodo| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.19630564.svg
+                :target: https://doi.org/10.5281/zenodo.19630564
 
 .. substitutions
 .. |banner| image:: docs/source/logo/BluePyOptBanner.png
