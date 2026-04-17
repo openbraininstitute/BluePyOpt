@@ -28,13 +28,6 @@ def test_nrnsimulator_mechanisms_directory_set():
 
 
 @pytest.mark.unit
-def test_nrnsimulator_default_mechanisms_directory_is_none():
-    """NrnSimulator() without mechanisms_directory has None."""
-    sim = ephys.simulators.NrnSimulator()
-    assert sim.mechanisms_directory is None
-
-
-@pytest.mark.unit
 def test_lfpysimulator_mechanisms_directory_set():
     """LFPySimulator(mechanisms_directory=path) stores the attribute."""
     for path in ["/tmp/mechs", "/some/other/path"]:
@@ -82,13 +75,14 @@ def test_l5pc_lfpy_evaluator_has_mechanisms_directory():
 
 @pytest.mark.unit
 def test_nrnsimulator_defaults_preserved():
-    """NrnSimulator() defaults: cvode_active=True, dt>0, etc."""
+    """NrnSimulator() defaults are all correct, and custom args are stored."""
     sim = ephys.simulators.NrnSimulator()
     assert sim.cvode_active is True
-    assert sim.mechanisms_directory is None
-    assert sim.dt is not None
     assert isinstance(sim.dt, float)
     assert sim.dt > 0
+    assert sim.mechanisms_directory is None
+    assert sim.cvode_minstep_value is None
+    assert sim.random123_globalindex is None
 
 
 @pytest.mark.unit
@@ -107,15 +101,3 @@ def test_nrnsimulator_attributes_preserved():
         assert sim.dt == dt_val
         assert sim.cvode_active == cv_val
         assert sim.mechanisms_directory == md_val
-
-
-@pytest.mark.unit
-def test_nrnsimulator_default_no_regression():
-    """NrnSimulator() default construction preserves all defaults."""
-    sim = ephys.simulators.NrnSimulator()
-    assert sim.cvode_active is True
-    assert isinstance(sim.dt, float)
-    assert sim.dt > 0
-    assert sim.mechanisms_directory is None
-    assert sim.cvode_minstep_value is None
-    assert sim.random123_globalindex is None
