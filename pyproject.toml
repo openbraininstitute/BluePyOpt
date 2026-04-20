@@ -39,13 +39,13 @@ keywords = [
 ]
 
 [project.optional-dependencies]
-all = ["scoop>=0.7", "pyneuroml>=0.5.20", "libNeuroML>=0.3.1", "LFPy>=2.3", "arbor>=0.10"]
-tests = ["pyneuroml>=0.5.20", "libNeuroML>=0.3.1", "LFPy>=2.3", "arbor>=0.10"]
+all = ["scoop>=0.7", "pyneuroml>=0.5.20", "libNeuroML>=0.3.1", "LFPy>=2.3", "arbor>=0.10,<0.12"]
+tests = ["pyneuroml>=0.5.20", "libNeuroML>=0.3.1", "LFPy>=2.3", "arbor>=0.10,<0.12"]
 tests-no-arbor = ["pyneuroml>=0.5.20", "libNeuroML>=0.3.1", "LFPy>=2.3"]
 scoop = ["scoop>=0.7"]
 neuroml = ["pyneuroml>=0.5.20", "libNeuroML>=0.3.1"]
 lfpy = ["LFPy>=2.3"]
-arbor = ["arbor>=0.10"]
+arbor = ["arbor>=0.10,<0.12"]
 
 [project.urls]
 Homepage = "https://github.com/openbraininstitute/BluePyOpt"
