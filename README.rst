@@ -206,7 +206,7 @@ Copyright (c) 2025 Open Brain Institute
                   :target: https://github.com/openbraininstitute/bluepyopt/blob/master/LICENSE.txt
                   :alt: license
 
-.. |build| image:: https://github.com/openbraininstitute/BluePyOpt/workflows/Build/badge.svg?branch=master
+.. |build| image:: https://github.com/openbraininstitute/BluePyOpt/actions/workflows/build.yml/badge.svg?branch=master
                 :target: https://github.com/openbraininstitute/BluePyOpt/actions
                 :alt: actions build status
 
