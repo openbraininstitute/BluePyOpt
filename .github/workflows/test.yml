@@ -5,6 +5,10 @@ on:
   # allows this workflow to be reusable (e.g. by the build workflow)
   workflow_call:
 
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   test:
     name: Test for python ${{ matrix.python-version }} on ${{ matrix.os }}
@@ -38,5 +42,5 @@ jobs:
     - name: "Upload coverage to Codecov"
       uses: codecov/codecov-action@v6
       with:
-        token: ${{ secrets.CODECOV_TOKEN }}
-        fail_ci_if_error: false
+        use_oidc: true
+        fail_ci_if_error: true
