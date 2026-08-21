@@ -24,12 +24,13 @@ sys.path.insert(0, os.path.abspath('.'))
 # -- General configuration -----------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
-needs_sphinx = '1.3'
+needs_sphinx = "8.2"
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.viewcode',
-              'sphinx.ext.autosummary', 'sphinx.ext.napoleon']
+              'sphinx.ext.autosummary', 'sphinx.ext.napoleon',
+              'sphinx.ext.doctest']
 
 # napoleon_numpy_docstring = True
 napoleon_google_docstring = True
@@ -93,29 +94,28 @@ pygments_style = 'sphinx'
 #modindex_common_prefix = []
 
 autosummary_generate = True
-autodoc_default_flags = ['show-inheritance']
+autodoc_default_options = {
+    'show-inheritance': True,
+}
 autoclass_content = 'both'
-tolerate_sphinx_warnings = True
 
 # -- Options for HTML output ---------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'sphinx-bluebrain-theme'
-html_title = 'BluepyOpt'
+html_theme = "obi_sphinx_theme"
+html_title = "BluepyOpt"
 html_show_sourcelink = False
 html_theme_options = {
-    "repo_url": "https://github.com/BlueBrain/BluePyOpt/",
-    "repo_name": "BlueBrain/BluePyOpt"
+    "icon_links": [
+        {
+            "name": "GitHub",
+            "url": "https://github.com/openbraininstitute/BluePyOpt",
+            "icon": "fa-brands fa-github",
+        },
+    ],
+    "navbar_align": "left",
 }
-
-# Theme options are theme-specific and customize the look and feel of a theme
-# further.  For a list of options available for each theme, see the
-# documentation.
-#html_theme_options = {}
-
-# Add any paths that contain custom themes here, relative to this directory.
-html_theme_path = ['./']
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
