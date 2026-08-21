@@ -7,6 +7,9 @@ on:
 
 jobs:
   call-test-workflow:
+    permissions:
+      contents: read
+      id-token: write
     uses: openbraininstitute/BluePyOpt/.github/workflows/test.yml@master
   
   keep-workflow-alive:
