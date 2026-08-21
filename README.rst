@@ -210,7 +210,7 @@ Copyright (c) 2025 Open Brain Institute
                 :target: https://github.com/openbraininstitute/BluePyOpt/actions
                 :alt: actions build status
 
-.. |coverage| image:: https://codecov.io/github/openbraininstitute/BluePyOpt/coverage.svg?branch=master
+.. |coverage| image:: https://codecov.io/gh/openbraininstitute/bluepyopt/branch/master/graph/badge.svg
                    :target: https://codecov.io/gh/openbraininstitute/bluepyopt
                    :alt: coverage
 
