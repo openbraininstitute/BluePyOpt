@@ -106,16 +106,6 @@ autoclass_content = 'both'
 html_theme = "obi_sphinx_theme"
 html_title = "BluepyOpt"
 html_show_sourcelink = False
-html_theme_options = {
-    "icon_links": [
-        {
-            "name": "GitHub",
-            "url": "https://github.com/openbraininstitute/BluePyOpt",
-            "icon": "fa-brands fa-github",
-        },
-    ],
-    "navbar_align": "left",
-}
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
