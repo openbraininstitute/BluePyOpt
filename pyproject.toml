@@ -17,8 +17,6 @@ dependencies = [
     "pandas>=0.18",
     "deap>=1.3.3",
     "efel>=2.13",
-    "ipyparallel",
-    "pickleshare>=0.7.3",
     "Jinja2>=2.8",
     "Pebble>=4.6.0",
     "NEURON>=7.8",
@@ -39,13 +37,15 @@ keywords = [
 ]
 
 [project.optional-dependencies]
-all = ["scoop>=0.7", "pyneuroml>=0.5.20", "libNeuroML>=0.3.1", "LFPy>=2.3", "arbor>=0.10,<0.12"]
+all = ["scoop>=0.7", "pyneuroml>=0.5.20", "libNeuroML>=0.3.1", "LFPy>=2.3", "arbor>=0.10,<0.12", "ipyparallel", "pickleshare>=0.7.3", "matplotlib"]
 tests = ["pyneuroml>=0.5.20", "libNeuroML>=0.3.1", "LFPy>=2.3", "arbor>=0.10,<0.12"]
 tests-no-arbor = ["pyneuroml>=0.5.20", "libNeuroML>=0.3.1", "LFPy>=2.3"]
 scoop = ["scoop>=0.7"]
 neuroml = ["pyneuroml>=0.5.20", "libNeuroML>=0.3.1"]
 lfpy = ["LFPy>=2.3"]
 arbor = ["arbor>=0.10,<0.12"]
+# Dependencies for the optional ipyparallel-based bpopt_tasksdb helper script.
+ipyp = ["ipyparallel", "pickleshare>=0.7.3", "matplotlib"]
 
 [project.urls]
 Homepage = "https://github.com/openbraininstitute/BluePyOpt"
@@ -72,7 +72,10 @@ bluepyopt = [
 ]
 
 [tool.setuptools.packages.find]
-exclude = ["examples*"]
+exclude = ["examples*", "bluepyopt.tests*"]
+
+[tool.setuptools.exclude-package-data]
+"*" = ["tests/*", "tests/**/*"]
 
 [tool.setuptools_scm]
 version_scheme = "python-simplified-semver"
