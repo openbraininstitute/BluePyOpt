@@ -29,7 +29,6 @@ import dateutil.parser
 import itertools
 
 import numpy as np
-import matplotlib.pyplot as plt
 
 
 def get_engine_data(tasksdb_filename):
@@ -67,6 +66,8 @@ def get_engine_data(tasksdb_filename):
 def plot_usage(tasks, engine_number_map):
     """Plot usage stats"""
 
+    import matplotlib.pyplot as plt
+
     plt.figure(figsize=(8, 8))
     for engine_uuid, task_list in tasks.items():
         engine_number = engine_number_map[engine_uuid]
@@ -91,6 +92,8 @@ def plot_usage(tasks, engine_number_map):
 
 def plot_duration_histogram(tasks):
     """Plot duration histogram"""
+    import matplotlib.pyplot as plt
+
     plt.figure(figsize=(8, 8))
 
     durations = np.fromiter((t['duration']
@@ -137,6 +140,7 @@ def run(arg_list):
     plot_usage(tasks, engine_number_map)
     plot_duration_histogram(tasks)
 
+    import matplotlib.pyplot as plt
     plt.show()
 
 
