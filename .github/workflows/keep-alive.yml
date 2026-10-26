@@ -16,21 +16,8 @@ jobs:
     name: Keep workflow alive
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      actions: write
     steps:
-      - uses: actions/checkout@v6
-        with:
-          ref: master
-
-      - name: commit IF last commit is older than 50 days
-        run: |
-          datethen=$(date -d "-50 days" --utc +%s)
-          last_push=$(git log -1 --format=%ct)
-          if [ "$last_push" -le "$datethen" ]; then
-            git config user.name "Github Actions Keepalive Bot"
-            git config user.email "<>"
-            git commit -m "Empty commit to keep the github workflows alive" --allow-empty
-            git push origin master
-          else
-            echo "Last commit is recent enough, skipping keepalive commit."
-          fi
+      # Re-enables the scheduled workflow via the GitHub API instead of pushing
+      # an empty commit to master (which is blocked by the branch ruleset).
+      - uses: liskin/gh-workflow-keepalive@f72ff1a1336129f29bf0166c0fd0ca6cf1bcb38c  # v1
