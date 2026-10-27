@@ -55,7 +55,7 @@ Tracker = "https://github.com/openbraininstitute/BluePyOpt/issues"
 Documentation = "https://bluepyopt.readthedocs.io/en/latest"
 
 [project.scripts]
-bpopt_tasksdb = "bluepyopt:ipyp.bpopt_tasksdb.main"
+bpopt_tasksdb = "bluepyopt.ipyp.bpopt_tasksdb:main"
 
 [tool.setuptools]
 include-package-data = true
