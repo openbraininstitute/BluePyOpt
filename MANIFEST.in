@@ -10,3 +10,4 @@ include README.rst
 include AUTHORS.txt
 include COPYING
 include COPYING.lesser
+recursive-include bluepyopt/tests *
