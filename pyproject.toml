@@ -37,15 +37,15 @@ keywords = [
 ]
 
 [project.optional-dependencies]
-all = ["scoop>=0.7", "pyneuroml>=0.5.20", "libNeuroML>=0.3.1", "LFPy>=2.3", "arbor>=0.10,<0.12", "ipyparallel", "pickleshare>=0.7.3", "matplotlib"]
-tests = ["pyneuroml>=0.5.20", "libNeuroML>=0.3.1", "LFPy>=2.3", "arbor>=0.10,<0.12"]
-tests-no-arbor = ["pyneuroml>=0.5.20", "libNeuroML>=0.3.1", "LFPy>=2.3"]
+all = ["scoop>=0.7", "pyneuroml>=0.5.20", "libNeuroML>=0.3.1", "LFPy>=2.3", "arbor>=0.10,<0.12", "ipyparallel", "matplotlib"]
+tests = ["pyneuroml>=0.5.20", "libNeuroML>=0.3.1", "LFPy>=2.3", "arbor>=0.10,<0.12", "matplotlib"]
+tests-no-arbor = ["pyneuroml>=0.5.20", "libNeuroML>=0.3.1", "LFPy>=2.3", "matplotlib"]
 scoop = ["scoop>=0.7"]
 neuroml = ["pyneuroml>=0.5.20", "libNeuroML>=0.3.1"]
 lfpy = ["LFPy>=2.3"]
 arbor = ["arbor>=0.10,<0.12"]
 # Dependencies for the optional ipyparallel-based bpopt_tasksdb helper script.
-ipyp = ["ipyparallel", "pickleshare>=0.7.3", "matplotlib"]
+ipyp = ["ipyparallel", "matplotlib"]
 
 [project.urls]
 Homepage = "https://github.com/openbraininstitute/BluePyOpt"
