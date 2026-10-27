@@ -6,7 +6,7 @@ include bluepyopt/ephys/templates/acc/_json_template.jinja2
 include bluepyopt/ephys/templates/acc/decor_acc_template.jinja2
 include bluepyopt/ephys/templates/acc/label_dict_acc_template.jinja2
 
-include.txt
+include README.rst
 include AUTHORS.txt
 include COPYING
 include COPYING.lesser

@@ -12,6 +12,11 @@ The `ipcontroller` gets its work from clients that connect to it.
 
 ## Installation
 
+> **Note:** As of recent versions, `ipyparallel` is no longer installed
+> automatically with `BluePyOpt`. Install it explicitly, either on its own
+> (`pip install ipyparallel`) or together with BluePyOpt via the extra:
+> `pip install bluepyopt[ipyp]`.
+
 `ipyparallel` can be installed using pip:
 
     # create and activate virtualenv
