@@ -1,7 +1,11 @@
 """bluepyopt.optimisations tests"""
 
 
+import sys
+import types
+
 import bluepyopt.optimisations
+import bluepyopt.deapext.optimisations
 import bluepyopt.ephys.examples.simplecell
 
 import pytest
@@ -106,3 +110,81 @@ def test_selectorname():
     assert (
         ibea_optimisation.toolbox.select.func
         == bluepyopt.deapext.tools.selIBEA)
+
+
+@pytest.mark.unit
+def test_DEAPOptimisation_zero_params():
+    "deapext.optimisation: evaluator without params raises ValueError"
+
+    class EmptyEvaluator(object):
+        params = []
+        objectives = [None]
+
+    pytest.raises(
+        ValueError,
+        bluepyopt.deapext.optimisations.DEAPOptimisation,
+        EmptyEvaluator())
+
+
+@pytest.mark.unit
+def test_DEAPOptimisation_scoop_with_map_function():
+    "deapext.optimisation: scoop and map_function are exclusive"
+
+    simplecell = bluepyopt.ephys.examples.simplecell.SimpleCell()
+
+    pytest.raises(
+        Exception,
+        bluepyopt.deapext.optimisations.DEAPOptimisation,
+        simplecell.cell_evaluator,
+        use_scoop=True,
+        map_function=map)
+
+
+@pytest.mark.unit
+def test_DEAPOptimisation_scoop(monkeypatch):
+    "deapext.optimisation: scoop futures registered as map"
+
+    futures = types.ModuleType("scoop.futures")
+    futures.map = map
+    scoop = types.ModuleType("scoop")
+    scoop.futures = futures
+    monkeypatch.setitem(sys.modules, "scoop", scoop)
+    monkeypatch.setitem(sys.modules, "scoop.futures", futures)
+
+    simplecell = bluepyopt.ephys.examples.simplecell.SimpleCell()
+    optimisation = bluepyopt.deapext.optimisations.DEAPOptimisation(
+        simplecell.cell_evaluator, use_scoop=True)
+
+    assert optimisation.toolbox.map.func == map
+
+
+@pytest.mark.unit
+def test_DEAPOptimisation_run_from_parents_size_mismatch():
+    "deapext.optimisation: parent population size overrides offspring_size"
+
+    simplecell = bluepyopt.ephys.examples.simplecell.SimpleCell()
+    optimisation = bluepyopt.optimisations.DEAPOptimisation(
+        simplecell.cell_evaluator, offspring_size=2)
+
+    parent_population = [[0.060, 0.065]]
+    pop, hof, log, hist = optimisation.run(
+        max_ngen=0, parent_population=parent_population)
+
+    assert optimisation.offspring_size == 1
+    assert len(pop) == 1
+    numpy.testing.assert_almost_equal(pop[0], parent_population[0])
+
+
+@pytest.mark.unit
+def test_DEAPOptimisation_run_from_bad_parent():
+    "deapext.optimisation: wrong parent length raises Exception"
+
+    simplecell = bluepyopt.ephys.examples.simplecell.SimpleCell()
+    optimisation = bluepyopt.optimisations.DEAPOptimisation(
+        simplecell.cell_evaluator, offspring_size=1)
+
+    pytest.raises(
+        Exception,
+        optimisation.run,
+        max_ngen=0,
+        parent_population=[[0.060]])

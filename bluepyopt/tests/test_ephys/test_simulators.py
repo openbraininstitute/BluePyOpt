@@ -234,3 +234,183 @@ def test_lfpysimulator_disable_banner_exception(mock_glob):
     with warnings.catch_warnings(record=True) as warnings_record:
         ephys.simulators.LFPySimulator._nrn_disable_banner()
         assert len(warnings_record) == 1
+
+
+@pytest.mark.unit
+def test_disable_banner_hoc_so():
+    """ephys.simulators: test if disable_banner loads the hoc library"""
+
+    fake_ctypes = mock.MagicMock()
+
+    with mock.patch("platform.system", mock.MagicMock(return_value="Linux")), \
+            mock.patch.object(
+                pathlib.Path, "glob",
+                return_value=[pathlib.Path("/fake/hoc.so")]), \
+            mock.patch.object(ephys.simulators, "ctypes", fake_ctypes):
+        neuron_sim = ephys.simulators.NrnSimulator()
+
+        assert neuron_sim.disable_banner
+        assert neuron_sim.banner_disabled
+        fake_ctypes.cdll.__getitem__.assert_called_once_with("/fake/hoc.so")
+        fake_ctypes.c_int.in_dll.assert_called_once()
+
+
+@pytest.mark.unit
+def test_nrnsim_run_fixed_dt():
+    """ephys.simulators: test run with cvode disabled uses fixed dt"""
+
+    neuron_sim = ephys.simulators.NrnSimulator(dt=0.025)
+    neuron_sim.run(tstop=1.0, cvode_active=False)
+
+    assert neuron_sim.neuron.h.dt == 0.025
+
+
+@pytest.mark.unit
+def test_nrnsim_run_random123():
+    """ephys.simulators: test run sets the Random123 global index"""
+
+    neuron_sim = ephys.simulators.NrnSimulator()
+    neuron_sim.run(tstop=1.0, random123_globalindex=5)
+
+
+@pytest.mark.unit
+def test_nrnsim_run_exception():
+    """ephys.simulators: test run wraps hoc errors in NrnSimulatorException"""
+
+    neuron_sim = ephys.simulators.NrnSimulator()
+
+    fake_neuron = mock.MagicMock()
+    fake_neuron.h.dt = neuron_sim.dt
+    fake_neuron.h.run.side_effect = RuntimeError("hoc failure")
+
+    with mock.patch.object(
+        ephys.simulators.NrnSimulator, "neuron",
+        new_callable=mock.PropertyMock, return_value=fake_neuron
+    ):
+        pytest.raises(
+            ephys.simulators.NrnSimulatorException,
+            neuron_sim.run,
+            tstop=1.0)
+
+
+@pytest.mark.unit
+def test_lfpysim_run_random123():
+    """ephys.simulators: test LFPy run sets the Random123 global index"""
+
+    neuron_sim = ephys.simulators.LFPySimulator()
+    lfpy_cell = mock.MagicMock()
+    neuron_sim.run(
+        lfpy_cell=lfpy_cell,
+        lfpy_electrode=None,
+        tstop=1.0,
+        random123_globalindex=5)
+
+    assert lfpy_cell.simulate.called
+
+
+@pytest.mark.unit
+def test_lfpysim_run_exception():
+    """ephys.simulators: test LFPy run raises LFPySimulatorException"""
+
+    neuron_sim = ephys.simulators.LFPySimulator()
+    lfpy_cell = mock.MagicMock()
+    lfpy_cell.simulate.side_effect = RuntimeError("simulate failure")
+
+    with pytest.raises(ephys.simulators.LFPySimulatorException):
+        neuron_sim.run(
+            lfpy_cell=lfpy_cell,
+            lfpy_electrode=None,
+            tstop=1.0)
+
+
+def make_fake_arbor():
+    """Build a fake arbor namespace for ArbSimulator tests"""
+
+    catalogue = mock.MagicMock()
+
+    cell_model = mock.MagicMock()
+    cell_model.properties.catalogue = catalogue
+
+    fake_arbor = types.SimpleNamespace(
+        cable_cell=mock.MagicMock(return_value=mock.MagicMock()),
+        single_cell_model=mock.MagicMock(return_value=cell_model),
+        catalogue=mock.MagicMock(return_value=catalogue),
+        load_catalogue=mock.MagicMock(return_value=mock.MagicMock()),
+        default_catalogue=mock.MagicMock(return_value=mock.MagicMock()),
+        bbp_catalogue=mock.MagicMock(return_value=mock.MagicMock()),
+        allen_catalogue=mock.MagicMock(return_value=mock.MagicMock()),
+        units=types.SimpleNamespace(ms=1.0),
+    )
+    return fake_arbor, cell_model
+
+
+@pytest.mark.unit
+def test_arbsimulator_init():
+    """ephys.simulators: test if ArbSimulator constructor works"""
+
+    arb_sim = ephys.simulators.ArbSimulator()
+    assert isinstance(arb_sim, ephys.simulators.ArbSimulator)
+    arb_sim.initialize()
+
+
+@pytest.mark.unit
+def test_arbsimulator_missing_catalogue():
+    """ephys.simulators: test missing catalogue raises ArbSimulatorException"""
+
+    pytest.raises(
+        ephys.simulators.ArbSimulatorException,
+        ephys.simulators.ArbSimulator,
+        ext_catalogues={"mycat": "/nonexistent/path"})
+
+
+@pytest.mark.unit
+def test_arbsimulator_instantiate(tmp_path, monkeypatch):
+    """ephys.simulators: test ArbSimulator instantiate with catalogues"""
+
+    fake_arbor, cell_model = make_fake_arbor()
+    monkeypatch.setattr(ephys.simulators, "arbor", fake_arbor)
+
+    (tmp_path / "mycat-catalogue.so").touch()
+    arb_sim = ephys.simulators.ArbSimulator(
+        ext_catalogues={"mycat": str(tmp_path)})
+    model = arb_sim.instantiate(morph=None, decor=None, labels=None)
+
+    assert model is cell_model
+    fake_arbor.load_catalogue.assert_called_once()
+    # mycat + default + BBP + allen
+    assert cell_model.properties.catalogue.extend.call_count == 4
+
+
+@pytest.mark.unit
+def test_arbsimulator_instantiate_no_ext(monkeypatch):
+    """ephys.simulators: test ArbSimulator instantiate without catalogues"""
+
+    fake_arbor, cell_model = make_fake_arbor()
+    monkeypatch.setattr(ephys.simulators, "arbor", fake_arbor)
+
+    arb_sim = ephys.simulators.ArbSimulator()
+    model = arb_sim.instantiate(morph=None, decor=None, labels=None)
+
+    assert model is cell_model
+    fake_arbor.load_catalogue.assert_not_called()
+    # default + BBP + allen
+    assert cell_model.properties.catalogue.extend.call_count == 3
+
+
+@pytest.mark.unit
+def test_arbsimulator_run(monkeypatch):
+    """ephys.simulators: test ArbSimulator run with and without dt"""
+
+    fake_arbor, cell_model = make_fake_arbor()
+    monkeypatch.setattr(ephys.simulators, "arbor", fake_arbor)
+
+    arb_cell_model = mock.MagicMock()
+
+    arb_sim = ephys.simulators.ArbSimulator(dt=0.1)
+    arb_sim.run(arb_cell_model, tstop=10)
+    arb_cell_model.run.assert_called_once_with(tfinal=10.0, dt=0.1)
+
+    arb_cell_model = mock.MagicMock()
+    arb_sim = ephys.simulators.ArbSimulator()
+    arb_sim.run(arb_cell_model, tstop=10)
+    arb_cell_model.run.assert_called_once_with(tfinal=10.0)

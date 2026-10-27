@@ -36,3 +36,27 @@ def test_hypeIndicatorSampled():
     assert hv[0] == 0
     assert hv[1] == 62500
     assert numpy.abs((hv[2] / 100) - 1) < 0.05
+
+
+@pytest.mark.unit
+def test_hypeIndicatorExact_negative_k():
+    """deapext.hype: hypeIndicatorExact defaults k to the population size"""
+
+    points = numpy.asarray([[0., 0.], [1., 1.], [2., 2.]])
+    bounds = numpy.asarray([5., 5.])
+
+    hv = bluepyopt.deapext.hype.hypeIndicatorExact(points, bounds, k=-1)
+
+    numpy.testing.assert_almost_equal(hv, [13.5, 4.5, 1.])
+
+
+@pytest.mark.unit
+def test_hypeIndicatorExact_small_k():
+    """deapext.hype: hypeIndicatorExact stops once i exceeds k"""
+
+    points = numpy.asarray([[0., 0.], [1., 1.], [2., 2.]])
+    bounds = numpy.asarray([5., 5.])
+
+    hv = bluepyopt.deapext.hype.hypeIndicatorExact(points, bounds, k=2)
+
+    numpy.testing.assert_almost_equal(hv, [10.75, 1.75, 0.])
