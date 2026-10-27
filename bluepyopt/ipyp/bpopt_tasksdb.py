@@ -31,6 +31,21 @@ import itertools
 import numpy as np
 
 
+def _import_pyplot():
+    """Import matplotlib.pyplot, with a helpful error if it is missing.
+
+    matplotlib is an optional dependency of bpopt_tasksdb; install it via
+    ``pip install bluepyopt[ipyp]``.
+    """
+    try:
+        import matplotlib.pyplot as plt
+    except ImportError as e:
+        raise ImportError(
+            "bpopt_tasksdb requires matplotlib: pip install bluepyopt[ipyp]"
+        ) from e
+    return plt
+
+
 def get_engine_data(tasksdb_filename):
     """Main"""
     conn = sqlite3.connect(tasksdb_filename)
@@ -66,7 +81,7 @@ def get_engine_data(tasksdb_filename):
 def plot_usage(tasks, engine_number_map):
     """Plot usage stats"""
 
-    import matplotlib.pyplot as plt
+    plt = _import_pyplot()
 
     plt.figure(figsize=(8, 8))
     for engine_uuid, task_list in tasks.items():
@@ -92,7 +107,7 @@ def plot_usage(tasks, engine_number_map):
 
 def plot_duration_histogram(tasks):
     """Plot duration histogram"""
-    import matplotlib.pyplot as plt
+    plt = _import_pyplot()
 
     plt.figure(figsize=(8, 8))
 
@@ -140,7 +155,7 @@ def run(arg_list):
     plot_usage(tasks, engine_number_map)
     plot_duration_histogram(tasks)
 
-    import matplotlib.pyplot as plt
+    plt = _import_pyplot()
     plt.show()
 
 
