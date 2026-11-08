@@ -146,6 +146,7 @@ def test_disable_banner_exception(mock_glob):
     import warnings
 
     with warnings.catch_warnings(record=True) as warnings_record:
+        warnings.simplefilter("always")
         ephys.simulators.NrnSimulator._nrn_disable_banner()
         assert len(warnings_record) == 1
 
@@ -232,6 +233,7 @@ def test_lfpysimulator_disable_banner_exception(mock_glob):
     import warnings
 
     with warnings.catch_warnings(record=True) as warnings_record:
+        warnings.simplefilter("always")
         ephys.simulators.LFPySimulator._nrn_disable_banner()
         assert len(warnings_record) == 1
 
