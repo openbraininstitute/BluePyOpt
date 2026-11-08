@@ -24,6 +24,9 @@ Copyright (c) 2016-2020, EPFL/Blue Brain Project
 import numpy
 
 
+from types import SimpleNamespace
+from unittest import mock
+
 import pytest
 import numpy
 
@@ -275,3 +278,99 @@ def test_LFPySquarePulse_instantiate():
 
     stim.destroy(sim=lfpy_sim)
     dummy_cell.destroy(sim=lfpy_sim)
+
+
+@pytest.mark.unit
+def test_LFPStimulus_is_abstract():
+    """ephys.stimuli: LFPStimulus.instantiate must be overridden"""
+    with pytest.raises(NotImplementedError):
+        ephys.stimuli.LFPStimulus().instantiate()
+
+
+@pytest.mark.unit
+def test_NrnCurrentPlayStimulus_envelope():
+    """ephys.stimuli: the envelope pairs times with currents"""
+    stimulus = ephys.stimuli.NrnCurrentPlayStimulus(
+        time_points=[0.0, 10.0], current_points=[0.1, 0.2], location=None
+    )
+
+    assert stimulus.envelope() == [(0.0, 0.1), (10.0, 0.2)]
+
+
+@pytest.mark.unit
+def test_NrnSquarePulse_envelope():
+    """ephys.stimuli: the square pulse envelope has sharp edges"""
+    stimulus = ephys.stimuli.NrnSquarePulse(
+        step_amplitude=0.5, step_delay=5.0, step_duration=10.0,
+        total_duration=20.0, location=None
+    )
+
+    assert stimulus.envelope() == [
+        (0.0, 0.0), (5.0, 0.0), (5.0, 0.5), (15.0, 0.5), (15.0, 0.0),
+        (20.0, 0.0),
+    ]
+
+
+def net_stim(noise):
+    location = SimpleNamespace(pprocess_mech=SimpleNamespace(name="synapse"))
+    return ephys.stimuli.NrnNetStimStimulus(
+        locations=[location], total_duration=100.0, interval=10.0, number=3,
+        start=5.0, noise=noise, weight=0.5
+    )
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("noise", [0.0, 1.0])
+@pytest.mark.xfail(
+    raises=TypeError,
+    strict=True,
+    reason="acc_events gives Arbor schedules numbers without units",
+)
+def test_NrnNetStimStimulus_acc_events(noise):
+    """ephys.stimuli: one Arbor event generator per location"""
+    pytest.importorskip("arbor")
+
+    assert len(net_stim(noise).acc_events()) == 1
+
+
+@pytest.mark.unit
+def test_NrnNetStimStimulus_acc_events_rejects_partial_noise():
+    """ephys.stimuli: Arbor only supports noise of 0 or 1"""
+    with pytest.raises(ValueError, match="Only noise = 0 or 1"):
+        net_stim(0.5).acc_events()
+
+
+def lfpy_pulse(location):
+    return ephys.stimuli.LFPySquarePulse(
+        step_amplitude=0.5, step_delay=5.0, step_duration=10.0,
+        total_duration=20.0, location=location
+    )
+
+
+@pytest.mark.unit
+def test_LFPySquarePulse_uses_the_segment_closest_to_the_soma_distance():
+    """ephys.stimuli: LFPySquarePulse resolves soma distance locations"""
+    LFPy = pytest.importorskip("LFPy")
+    location = ephys.locations.NrnSomaDistanceCompLocation(
+        name="dist", seclist_name="apical", soma_distance=10.0
+    )
+    cell = SimpleNamespace(
+        x=numpy.array([0.0, 4.0, 9.0]),
+        y=numpy.zeros(3),
+        z=numpy.zeros(3),
+        somapos=numpy.zeros(3),
+    )
+
+    with mock.patch.object(LFPy, "StimIntElectrode") as electrode:
+        lfpy_pulse(location).instantiate(lfpy_cell=cell)
+
+    assert electrode.call_args.kwargs["idx"] == 2
+
+
+@pytest.mark.unit
+def test_LFPySquarePulse_rejects_unsupported_locations():
+    """ephys.stimuli: LFPySquarePulse only handles known locations"""
+    pytest.importorskip("LFPy")
+
+    with pytest.raises(NotImplementedError, match="not implemented"):
+        lfpy_pulse(object()).instantiate(lfpy_cell=SimpleNamespace())

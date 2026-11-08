@@ -22,6 +22,10 @@ Copyright (c) 2016-2020, EPFL/Blue Brain Project
 # pylint:disable=W0612
 
 
+import time
+from types import SimpleNamespace
+from unittest import mock
+
 import pytest
 
 import bluepyopt.ephys as ephys
@@ -511,3 +515,154 @@ def test_sweepprotocol_instantiate_with_LFPyCellModel():
 
     protocol.destroy(sim=nrn_sim)
     dummy_cell.destroy(sim=nrn_sim)
+
+
+class LegacyProtocol(ephys.protocols.Protocol):
+
+    """Protocol whose run method predates the timeout argument"""
+
+    def __init__(self, name, response):
+        super(LegacyProtocol, self).__init__(name)
+        self.response = response
+
+    def run(self, cell_model, param_values, sim=None, isolate=None):
+        return self.response
+
+    def subprotocols(self):
+        return {self.name: self}
+
+
+class BrokenProtocol(LegacyProtocol):
+
+    """Protocol that fails with an unrelated TypeError"""
+
+    def run(self, cell_model, param_values, sim=None, isolate=None,
+            timeout=None):
+        raise TypeError("something else went wrong")
+
+
+@pytest.mark.unit
+def test_sequenceprotocol_supports_protocols_without_timeout():
+    """ephys.protocols: SequenceProtocol retries without timeout"""
+    sequence = ephys.protocols.SequenceProtocol(
+        'seq', protocols=[LegacyProtocol('legacy', {'a': 1})])
+
+    responses = sequence.run(None, {}, sim=None, isolate=False, timeout=5)
+
+    assert responses == {'a': 1}
+
+
+@pytest.mark.unit
+def test_sequenceprotocol_reraises_other_type_errors():
+    """ephys.protocols: SequenceProtocol keeps unrelated TypeErrors"""
+    sequence = ephys.protocols.SequenceProtocol(
+        'seq', protocols=[BrokenProtocol('broken', {})])
+
+    with pytest.raises(TypeError, match="something else"):
+        sequence.run(None, {}, sim=None, isolate=False, timeout=5)
+
+
+@pytest.mark.unit
+def test_sequenceprotocol_str():
+    """ephys.protocols: SequenceProtocol string representation"""
+    legacy = LegacyProtocol('legacy', {})
+    sequence = ephys.protocols.SequenceProtocol('seq', protocols=[legacy])
+
+    assert str(sequence) == (
+        'Sequence protocol seq:\n1 subprotocols:\n%s\n' % str(legacy))
+
+
+def make_sweep(name='prot', **kwargs):
+    """Sweep protocol recording the soma of a dummy cell"""
+    soma_loc = ephys.locations.NrnSeclistCompLocation(
+        name='soma_loc', seclist_name='somatic', sec_index=0, comp_x=.5)
+    stim = ephys.stimuli.NrnSquarePulse(
+        step_amplitude=0.0, step_delay=0.0, step_duration=5,
+        total_duration=5, location=soma_loc)
+    rec = ephys.recordings.CompRecording(
+        name='soma.v', location=soma_loc, variable='v')
+    return ephys.protocols.SweepProtocol(
+        name, stimuli=[stim], recordings=[rec], **kwargs)
+
+
+class StochasticCell(dummycells.DummyCellModel1):
+
+    """Dummy cell recording the mechanism state seen during the run"""
+
+    def __init__(self):
+        super(StochasticCell, self).__init__('stochastic')
+        self.mechanisms = [SimpleNamespace(deterministic=False)]
+        self.seen = None
+
+    def instantiate(self, sim=None):
+        self.seen = self.mechanisms[0].deterministic
+        return super(StochasticCell, self).instantiate(sim=sim)
+
+
+class SlowCell(dummycells.DummyCellModel1):
+
+    """Dummy cell that never finishes freezing"""
+
+    def freeze(self, param_values):
+        time.sleep(30)
+
+
+@pytest.mark.unit
+def test_sweepprotocol_deterministic_restores_mechanism_state():
+    """ephys.protocols: deterministic only applies during the run"""
+    nrn_sim = ephys.simulators.NrnSimulator()
+    cell = StochasticCell()
+
+    make_sweep(deterministic=True).run(cell, {}, sim=nrn_sim, isolate=False)
+
+    assert cell.seen is True
+    assert cell.mechanisms[0].deterministic is False
+
+
+@pytest.mark.unit
+def test_sweepprotocol_passes_lfpy_objects_to_the_lfpy_simulator():
+    """ephys.protocols: SweepProtocol runs LFPySimulator with its cell"""
+    protocol = make_sweep()
+    protocol.instantiate = mock.MagicMock()
+    protocol.destroy = mock.MagicMock()
+    sim = mock.MagicMock(spec=ephys.simulators.LFPySimulator)
+    cell = mock.MagicMock()
+
+    protocol._run_func(cell, {}, sim=sim)
+
+    sim.run.assert_called_once_with(
+        lfpy_cell=cell.lfpy_cell,
+        lfpy_electrode=cell.lfpy_electrode,
+        tstop=protocol.total_duration,
+        cvode_active=protocol.cvode_active)
+
+
+@pytest.mark.unit
+def test_sweepprotocol_wraps_failures():
+    """ephys.protocols: SweepProtocol reports its own exception"""
+    cell = mock.MagicMock()
+    cell.freeze.side_effect = KeyError('missing')
+
+    with pytest.raises(ephys.protocols.SweepProtocolException):
+        make_sweep()._run_func(cell, {}, sim=mock.MagicMock())
+
+
+@pytest.mark.unit
+def test_sweepprotocol_rejects_negative_timeout():
+    """ephys.protocols: SweepProtocol refuses a negative timeout"""
+    nrn_sim = ephys.simulators.NrnSimulator()
+
+    with pytest.raises(ValueError, match="timeout should be > 0"):
+        make_sweep().run(dummycells.DummyCellModel1(), {}, sim=nrn_sim,
+                         isolate=True, timeout=-1)
+
+
+@pytest.mark.unit
+def test_sweepprotocol_returns_none_on_timeout():
+    """ephys.protocols: a timed out SweepProtocol returns None responses"""
+    nrn_sim = ephys.simulators.NrnSimulator()
+
+    responses = make_sweep().run(SlowCell(), {}, sim=nrn_sim, isolate=True,
+                                 timeout=0.2)
+
+    assert responses == {'soma.v': None}

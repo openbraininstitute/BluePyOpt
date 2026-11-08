@@ -2,6 +2,7 @@
 
 import os
 from os.path import join as joinp
+from unittest import mock
 
 import pytest
 import numpy
@@ -357,3 +358,240 @@ def test_masked_cosine_distance():
 
     score = efeatures.masked_cosine_distance(exp, model)
     assert score == distance.cosine([0.5], [0.7]) * 2. / 3.
+
+
+def load_response():
+    testdata_dir = joinp(
+        os.path.dirname(os.path.abspath(__file__)), 'testdata')
+    response = TimeVoltageResponse('mock_response')
+    response.read_csv(joinp(testdata_dir, 'TimeVoltageResponse.csv'))
+    return response
+
+
+def efel_feature(recording_names=None, **kwargs):
+    return efeatures.eFELFeature(
+        name='feature',
+        efel_feature_name='voltage_base',
+        recording_names=recording_names or {'': 'soma.v'},
+        stim_start=700,
+        stim_end=2700,
+        exp_mean=1,
+        exp_std=1,
+        **kwargs)
+
+
+@pytest.mark.unit
+def test_eFELFeature_needs_an_unnamed_recording():
+    """ephys.efeatures: eFELFeature requires the '' recording"""
+    feature = efel_feature(recording_names={'soma': 'soma.v'})
+
+    with pytest.raises(Exception, match="needs to be in recording_names"):
+        feature.calculate_feature({})
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("responses", [{}, {'soma.v': None}])
+def test_eFELFeature_without_a_response(responses):
+    """ephys.efeatures: a missing response gives no value and max score"""
+    feature = efel_feature()
+
+    assert feature.calculate_feature(responses) is None
+    assert feature.calculate_score(responses) == feature.max_score
+
+
+@pytest.mark.unit
+def test_eFELFeature_names_traces_of_other_locations():
+    """ephys.efeatures: extra recordings get a location postfix"""
+    feature = efel_feature(
+        recording_names={'': 'soma.v', 'location_AIS': 'ais.v'})
+    response = load_response()
+
+    trace = feature._construct_efel_trace(
+        {'soma.v': response, 'ais.v': response})
+
+    assert {'T', 'V', 'T;location_AIS', 'V;location_AIS'} <= set(trace)
+
+
+@pytest.mark.unit
+def test_eFELFeature_applies_interp_step():
+    """ephys.efeatures: interp_step is passed on to eFEL"""
+    feature = efel_feature(interp_step=0.1)
+
+    with mock.patch('efel.setDoubleSetting') as set_double:
+        feature._setup_efel()
+
+    set_double.assert_any_call('interp_step', 0.1)
+
+
+SOMA = 'soma_response'
+LFP = 'lfp_response'
+
+
+def extra_responses():
+    testdata_dir = joinp(
+        os.path.dirname(os.path.abspath(__file__)), 'testdata')
+    soma = TimeVoltageResponse(
+        name=SOMA,
+        time=numpy.load(joinp(testdata_dir, 'lfpy_soma_time.npy')),
+        voltage=numpy.load(joinp(testdata_dir, 'lfpy_soma_voltage.npy')))
+    lfp = TimeLFPResponse(
+        name=LFP,
+        time=numpy.load(joinp(testdata_dir, 'lfpy_time.npy')),
+        lfp=numpy.load(joinp(testdata_dir, 'lfpy_voltage.npy')))
+    return {SOMA: soma, LFP: lfp}
+
+
+def extra_feature(**kwargs):
+    arguments = dict(
+        name='extra',
+        extrafel_feature_name='halfwidth',
+        somatic_recording_name=SOMA,
+        recording_names={'': LFP},
+        channel_ids=0,
+        exp_mean=0.001,
+        exp_std=0.001,
+        stim_start=400,
+        stim_end=1750,
+        fs=10,
+        ms_cut=[10, 25])
+    arguments.update(kwargs)
+    return efeatures.extraFELFeature(**arguments)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("responses", [{}, {SOMA: None, LFP: None}])
+def test_extraFELFeature_without_a_somatic_response(responses):
+    """ephys.efeatures: no somatic response means no spikes to look at"""
+    feature = extra_feature()
+
+    assert feature.calculate_feature(responses) is None
+    assert feature.calculate_feature(
+        responses, return_waveforms=True) == (None, None)
+
+
+@pytest.mark.unit
+def test_extraFELFeature_without_an_extracellular_response():
+    """ephys.efeatures: a missing LFP gives no value and max score"""
+    feature = extra_feature()
+    responses = extra_responses()
+    responses[LFP] = None
+
+    assert feature.calculate_feature(responses) is None
+    assert feature.calculate_feature(
+        responses, return_waveforms=True) == (None, None)
+    assert feature.calculate_score(responses) == feature.max_score
+
+
+@pytest.mark.unit
+def test_extraFELFeature_can_return_waveforms():
+    """ephys.efeatures: the mean waveform is available on request"""
+    value, waveforms = extra_feature().calculate_feature(
+        extra_responses(), return_waveforms=True)
+
+    numpy.testing.assert_almost_equal(value, 0.0015)
+    assert waveforms.ndim == 2
+
+
+@pytest.mark.unit
+def test_extraFELFeature_applies_efel_settings():
+    """ephys.efeatures: every eFEL setting is passed on"""
+    feature = extra_feature(
+        interp_step=0.1,
+        double_settings={'a_double': 1.5},
+        int_settings={'an_int': 3})
+
+    with mock.patch('efel.setDoubleSetting') as set_double, \
+            mock.patch('efel.setIntSetting') as set_int:
+        feature._setup_efel()
+
+    set_double.assert_any_call('interp_step', 0.1)
+    set_double.assert_any_call('a_double', 1.5)
+    set_int.assert_any_call('an_int', 3)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("value, feature_kwargs", [
+    (numpy.inf, {}),
+    (numpy.float64(1.0), {'exp_std': 0.0}),
+    (numpy.nan, {}),
+])
+def test_extraFELFeature_unusable_scores_become_max_score(
+        value, feature_kwargs):
+    """ephys.efeatures: non-finite values score max_score"""
+    feature = extra_feature(**feature_kwargs)
+    feature.calculate_feature = lambda *args, **kwargs: value
+
+    assert feature.calculate_score(extra_responses()) == feature.max_score
+
+
+@pytest.mark.unit
+def test_extraFELFeature_scores_all_channels_by_cosine_distance():
+    """ephys.efeatures: several channels are compared as a vector"""
+    feature = extra_feature(channel_ids=None, exp_mean=[1.0, 0.0])
+    feature.calculate_feature = lambda *args, **kwargs: numpy.array([0., 1.])
+
+    assert feature.calculate_score(extra_responses()) == pytest.approx(1.0)
+
+
+@pytest.mark.unit
+def test_extraFELFeature_force_max_score_caps_the_score():
+    """ephys.efeatures: force_max_score limits large scores"""
+    feature = extra_feature(force_max_score=True, max_score=2.0)
+    feature.calculate_feature = lambda *args, **kwargs: numpy.float64(1.0)
+
+    assert feature.calculate_score(extra_responses()) == 2.0
+
+
+def sine_response(channels=None):
+    time = numpy.arange(0.0, 200.0, 0.1)
+    voltage = 5.0 + numpy.sin(2 * numpy.pi * time / 2.0)
+    if channels:
+        voltage = numpy.tile(voltage, (channels, 1))
+    return {'time': time, 'voltage': voltage}
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("channels", [None, 2])
+@pytest.mark.parametrize("filt_type", ["lfilter", "filtfilt"])
+def test_filter_response_highpass_removes_the_offset(channels, filt_type):
+    """ephys.efeatures: a scalar cut-off is a high-pass filter"""
+    filtered = efeatures._filter_response(
+        sine_response(channels), fcut=100.0, filt_type=filt_type)
+
+    assert filtered['voltage'].shape == sine_response(channels)[
+        'voltage'].shape
+    assert abs(numpy.mean(filtered['voltage'][..., 1000:])) < 0.1
+
+
+@pytest.mark.unit
+def test_get_waveforms_supports_a_single_channel():
+    """ephys.efeatures: a 1D trace is treated as one channel"""
+    waveforms = efeatures._get_waveforms(
+        sine_response(), numpy.array([50.0]), [1.0, 2.0])
+
+    assert waveforms.shape == (1, 1, 30)
+
+
+@pytest.mark.unit
+def test_get_waveforms_pads_snippets_outside_the_recording():
+    """ephys.efeatures: out-of-bounds snippets are padded with zeros"""
+    response = sine_response()
+    near_start, near_end = efeatures._get_waveforms(
+        response, numpy.array([0.5, 199.5]), [1.0, 2.0])[:, 0]
+
+    assert numpy.all(near_start[:5] == 0)
+    assert numpy.all(near_end[-15:] == 0)
+
+
+@pytest.mark.unit
+@pytest.mark.xfail(
+    raises=ValueError,
+    strict=True,
+    reason="a scalar snippet length mixes samples and milliseconds",
+)
+def test_get_waveforms_accepts_a_scalar_snippet_length():
+    """ephys.efeatures: a scalar snippet length is split around the peak"""
+    waveforms = efeatures._get_waveforms(
+        sine_response(), numpy.array([50.0]), 3.0)
+
+    assert waveforms.shape == (1, 1, 30)

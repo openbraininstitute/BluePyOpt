@@ -5,6 +5,8 @@
 import os
 
 
+from unittest import mock
+
 import pytest
 import numpy
 
@@ -128,3 +130,86 @@ def test_CellEvaluator_evaluate():
     numpy.testing.assert_almost_equal(
         feature_value, feature_value_eva['singleton']
     )
+
+
+def bare_evaluator(**kwargs):
+    """Evaluator around a mock cell model"""
+    arguments = dict(
+        cell_model=mock.MagicMock(),
+        param_names=[],
+        fitness_protocols={},
+        fitness_calculator=mock.MagicMock(objectives=[]),
+        sim=mock.MagicMock(),
+    )
+    arguments.update(kwargs)
+    return ephys.evaluators.CellEvaluator(**arguments)
+
+
+@pytest.mark.unit
+def test_CellEvaluator_requires_a_simulator():
+    """ephys.evaluators: CellEvaluator refuses a missing simulator"""
+    with pytest.raises(ValueError, match="provide a Simulator"):
+        bare_evaluator(sim=None)
+
+
+@pytest.mark.unit
+def test_CellEvaluator_checks_the_number_of_objectives():
+    """ephys.evaluators: objective_dict needs one value per objective"""
+    with pytest.raises(Exception, match="wrong number of objectives"):
+        bare_evaluator().objective_dict([1.0])
+
+
+@pytest.mark.unit
+def test_CellEvaluator_rejects_unknown_targets():
+    """ephys.evaluators: evaluate_with_dicts validates the target"""
+    with pytest.raises(Exception, match='has to be "scores" or "values"'):
+        bare_evaluator().evaluate_with_dicts({}, target='other')
+
+
+@pytest.mark.unit
+def test_CellEvaluator_requires_a_fitness_calculator():
+    """ephys.evaluators: evaluate_with_dicts needs a fitness calculator"""
+    evaluator = bare_evaluator()
+    evaluator.fitness_calculator = None
+
+    with pytest.raises(Exception, match="need fitness_calculator"):
+        evaluator.evaluate_with_dicts({})
+
+
+class LegacyProtocol(object):
+
+    """Protocol whose run method predates the timeout argument"""
+
+    def run(self, cell_model, param_values, sim=None, isolate=None):
+        return {'cell': cell_model, 'isolate': isolate}
+
+
+@pytest.mark.unit
+def test_CellEvaluator_supports_protocols_without_timeout():
+    """ephys.evaluators: run_protocol retries without timeout"""
+    evaluator = bare_evaluator()
+
+    response = evaluator.run_protocol(LegacyProtocol(), {}, isolate=False)
+
+    assert response == {'cell': evaluator.cell_model, 'isolate': False}
+
+
+@pytest.mark.unit
+def test_CellEvaluator_reraises_other_type_errors():
+    """ephys.evaluators: run_protocol keeps unrelated TypeErrors"""
+    protocol = mock.MagicMock()
+    protocol.run.side_effect = TypeError("something else went wrong")
+
+    with pytest.raises(TypeError, match="something else"):
+        bare_evaluator().run_protocol(protocol, {})
+
+
+@pytest.mark.unit
+def test_CellEvaluator_str_lists_the_protocols():
+    """ephys.evaluators: the string representation shows each protocol"""
+    protocol = mock.MagicMock()
+    protocol.__str__.return_value = 'the protocol'
+
+    text = str(bare_evaluator(fitness_protocols={'p': protocol}))
+
+    assert 'the protocol' in text
