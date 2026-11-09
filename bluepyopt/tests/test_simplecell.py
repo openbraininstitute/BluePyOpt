@@ -3,6 +3,8 @@
 import os
 import sys
 
+import pytest
+
 SIMPLECELL_PATH = os.path.abspath(
     os.path.join(os.path.dirname(__file__), "../../examples/simplecell")
 )
@@ -52,6 +54,7 @@ class TestSimpleCellArborClass(object):
 
     def test_exec(self):
         """Simplecell Arbor: test execution"""
+        pytest.importorskip("arbor")
         # When using import instead of execfile this doesn't work
         # Probably because multiprocessing doesn't work correctly during
         # import

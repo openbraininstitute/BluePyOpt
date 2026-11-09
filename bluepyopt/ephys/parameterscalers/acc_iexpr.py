@@ -94,7 +94,6 @@ class ArbIExprEmitter(ast.NodeVisitor):
 
     _iexpr_symbols = {
         ast.Constant: 'scalar',
-        ast.Num: 'scalar',
         ast.Add: 'add',
         ast.Sub: 'sub',
         ast.Mult: 'mul',
@@ -132,12 +131,6 @@ class ArbIExprEmitter(ast.NodeVisitor):
         self._emit(
             '(%s %s)' % (self._iexpr_symbols[type(node)],
                          self._constant_formatter(node.value))
-        )
-
-    def visit_Num(self, node):
-        self._emit(
-            '(%s %s)' % (self._iexpr_symbols[type(node)],
-                         self._constant_formatter(node.n))
         )
 
     def visit_Attribute(self, node):

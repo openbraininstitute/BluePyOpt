@@ -3,7 +3,6 @@
 import json
 import pathlib
 import tempfile
-import arbor
 
 import pytest
 
@@ -150,6 +149,7 @@ def test_parameterscalers_iexpr_generator_unsupported_attr():
 @pytest.mark.unit
 def test_parameterscalers_iexpr():
     """ephys.parameterscalers: Test iexpr"""
+    arbor = pytest.importorskip("arbor")
     # iexpr from bluepyopt/tests/test_ephys/test_parameterscalers.py
     iexpr = '(sub (scalar 0.62109375) ' \
             '(mul (log (pi) ) ' \
