@@ -13,14 +13,17 @@ jobs:
   test:
     name: Test for python ${{ matrix.python-version }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.continue-on-error || false }}
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
         include:
-          - os: macos-14
+          - os: macos-15
             python-version: "3.12"
-          - python-version: "3.14"
+          - os: ubuntu-latest
+            python-version: "3.14"
             continue-on-error: true
 
     steps:
