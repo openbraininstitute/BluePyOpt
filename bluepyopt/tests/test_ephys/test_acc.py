@@ -9,6 +9,7 @@ import pytest
 @pytest.mark.unit
 def test_arbor_labels():
     """Test Arbor labels."""
+    pytest.importorskip("arbor")
 
     region_label = ArbLabel(type='region',
                             name='first_branch',

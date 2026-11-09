@@ -329,6 +329,7 @@ def test_arb_populate_label_dict():
 @pytest.mark.unit
 def test_create_acc():
     """ephys.create_acc: Test create_acc"""
+    pytest.importorskip("arbor")
     mech = utils.make_mech()
     parameters = utils.make_parameters()
 
@@ -444,6 +445,7 @@ def test_create_acc_filename():
 @pytest.mark.unit
 def test_create_acc_replace_axon():
     """ephys.create_acc: Test create_acc with axon replacement"""
+    pytest.importorskip("arbor")
     mech = utils.make_mech()
     parameters = utils.make_parameters()
 
@@ -543,6 +545,7 @@ def run_short_sim(cable_cell):
 @pytest.mark.unit
 def test_cell_model_write_and_read_acc():
     """ephys.create_acc: Test write_acc and read_acc w/o axon replacement"""
+    pytest.importorskip("arbor")
     cell = make_cell(replace_axon=False)
     param_values = {"gnabar_hh": 0.1, "gkbar_hh": 0.03}
 
@@ -574,6 +577,7 @@ def test_cell_model_write_and_read_acc():
 @pytest.mark.unit
 def test_cell_model_write_and_read_acc_replace_axon():
     """ephys.create_acc: Test write_acc and read_acc w/ axon replacement"""
+    pytest.importorskip("arbor")
     cell = make_cell(replace_axon=True)
     param_values = {"gnabar_hh": 0.1, "gkbar_hh": 0.03}
 
@@ -673,6 +677,7 @@ def check_acc_dir(test_dir, ref_dir):
 
 @pytest.mark.unit
 def test_write_acc_simple():
+    pytest.importorskip("arbor")
     SIMPLECELL_PATH = str(
         (
             pathlib.Path(__file__).parent / "../../../examples/simplecell"
@@ -717,6 +722,7 @@ def test_write_acc_simple():
 
 @pytest.mark.unit
 def test_write_acc_l5pc():
+    pytest.importorskip("arbor")
     L5PC_PATH = str(
         (pathlib.Path(__file__).parent / "../../../examples/l5pc").resolve()
     )
