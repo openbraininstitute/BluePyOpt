@@ -109,7 +109,17 @@ Support for simulators other than NEURON is optional and not installed by defaul
 
 .. code-block:: bash
 
-    pip install bluepyopt[arbor]
+    pip install 'bluepyopt[arbor]'
+
+Parallelization with [ipyparallel](https://ipyparallel.readthedocs.io/en/latest/) is also optional and no longer installed by default. If you want to distribute an optimisation across multiple cores or machines, install the ``ipyp`` extra.
+
+.. code-block:: bash
+
+    pip install 'bluepyopt[ipyp]'
+
+.. note::
+
+    Quote the package spec (``'bluepyopt[ipyp]'``) when installing an extra. In zsh the unquoted form ``bluepyopt[ipyp]`` is interpreted as a glob pattern and fails with ``no matches found`` before pip ever runs.
 
 Cloud infrastructure
 ====================
