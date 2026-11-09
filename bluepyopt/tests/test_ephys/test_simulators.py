@@ -268,11 +268,38 @@ def test_nrnsim_run_fixed_dt():
 
 
 @pytest.mark.unit
+def test_nrnsim_run_explicit_dt():
+    """ephys.simulators: test run applies the given fixed time step"""
+
+    neuron_sim = ephys.simulators.NrnSimulator()
+    fake_neuron = mock.MagicMock()
+
+    with mock.patch.object(
+        ephys.simulators.NrnSimulator, "neuron",
+        new_callable=mock.PropertyMock, return_value=fake_neuron
+    ):
+        neuron_sim.run(tstop=1.0, cvode_active=False, dt=0.05)
+
+    assert fake_neuron.h.dt == 0.05
+    assert fake_neuron.h.steps_per_ms == 20.0
+    fake_neuron.h.run.assert_called_once_with()
+
+
+@pytest.mark.unit
 def test_nrnsim_run_random123():
     """ephys.simulators: test run sets the Random123 global index"""
 
     neuron_sim = ephys.simulators.NrnSimulator()
-    neuron_sim.run(tstop=1.0, random123_globalindex=5)
+    fake_neuron = mock.MagicMock()
+
+    with mock.patch.object(
+        ephys.simulators.NrnSimulator, "neuron",
+        new_callable=mock.PropertyMock, return_value=fake_neuron
+    ):
+        neuron_sim.run(tstop=1.0, cvode_active=True, random123_globalindex=5)
+
+    fake_neuron.h.Random.return_value.Random123_globalindex \
+        .assert_called_once_with(5)
 
 
 @pytest.mark.unit
@@ -301,13 +328,21 @@ def test_lfpysim_run_random123():
 
     neuron_sim = ephys.simulators.LFPySimulator()
     lfpy_cell = mock.MagicMock()
-    neuron_sim.run(
-        lfpy_cell=lfpy_cell,
-        lfpy_electrode=None,
-        tstop=1.0,
-        random123_globalindex=5)
+    fake_neuron = mock.MagicMock()
+
+    with mock.patch.object(
+        ephys.simulators.LFPySimulator, "neuron",
+        new_callable=mock.PropertyMock, return_value=fake_neuron
+    ):
+        neuron_sim.run(
+            lfpy_cell=lfpy_cell,
+            lfpy_electrode=None,
+            tstop=1.0,
+            random123_globalindex=5)
 
     assert lfpy_cell.simulate.called
+    fake_neuron.h.Random.return_value.Random123_globalindex \
+        .assert_called_once_with(5)
 
 
 @pytest.mark.unit

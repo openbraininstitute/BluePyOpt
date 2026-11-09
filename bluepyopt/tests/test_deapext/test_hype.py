@@ -39,6 +39,11 @@ def test_hypeIndicatorSampled():
 
 
 @pytest.mark.unit
+@pytest.mark.xfail(
+    raises=AssertionError,
+    strict=True,
+    reason="hype divides by i inside the product of the alpha coefficients",
+)
 def test_hypeIndicatorExact_negative_k():
     """deapext.hype: hypeIndicatorExact defaults k to the population size"""
 
@@ -47,7 +52,8 @@ def test_hypeIndicatorExact_negative_k():
 
     hv = bluepyopt.deapext.hype.hypeIndicatorExact(points, bounds, k=-1)
 
-    numpy.testing.assert_almost_equal(hv, [13.5, 4.5, 1.])
+    # with k equal to the population size, values sum to the dominated volume
+    numpy.testing.assert_almost_equal(hv, [15.5, 6.5, 3.])
 
 
 @pytest.mark.unit

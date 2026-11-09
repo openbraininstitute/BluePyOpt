@@ -108,6 +108,8 @@ def test_CMA_MO_default_offspring():
     # 4 + 3 * log(2)
     assert strategy.lambda_ == 6
     assert strategy.problem_size == 2
+    assert strategy.stopping_conditions[0].max_ngen == pytest.approx(
+        100 + 50 * 5 ** 2 / numpy.sqrt(6))
 
 
 @pytest.mark.unit
@@ -147,20 +149,19 @@ def test_CMA_MO_matching_centroids():
 
 
 @pytest.mark.unit
-def test_CMA_MO_scoop_with_map_function():
+def test_CMA_MO_scoop_with_map_function(fake_scoop):
     """deapext.CMA_MO: scoop and map_function are exclusive"""
 
-    pytest.raises(
-        Exception,
-        bluepyopt.deapext.CMA_MO.CMA_MO,
-        centroids=None,
-        offspring_size=4,
-        sigma=0.4,
-        max_ngen=10,
-        IndCreator=ind_creator,
-        RandIndCreator=rand_ind_creator,
-        map_function=map,
-        use_scoop=True)
+    with pytest.raises(Exception, match="Impossible to use scoop"):
+        bluepyopt.deapext.CMA_MO.CMA_MO(
+            centroids=None,
+            offspring_size=4,
+            sigma=0.4,
+            max_ngen=10,
+            IndCreator=ind_creator,
+            RandIndCreator=rand_ind_creator,
+            map_function=map,
+            use_scoop=True)
 
 
 @pytest.mark.unit
@@ -201,11 +202,19 @@ def test_CMA_MO_select():
     assert len(not_chosen) == 4
     assert set(ind.fitness.values[0] for ind in chosen) == {1., 2.}
 
-    # weight_hv == 1.0: pure hypervolume ordering
+    # weight_hv == 1.0: pure hypervolume ordering, largest volumes are chosen
+    numpy.random.seed(42)
     strategy.weight_hv = 1.0
     chosen, not_chosen = strategy._select(candidates)
     assert len(chosen) == 2
     assert len(not_chosen) == 4
+    assert set(ind.fitness.values[0] for ind in chosen) == {1., 2.}
+
+    # weight_hv between 0 and 1: both orderings agree on this population
+    numpy.random.seed(42)
+    strategy.weight_hv = 0.5
+    chosen, not_chosen = strategy._select(candidates)
+    assert set(ind.fitness.values[0] for ind in chosen) == {1., 2.}
 
 
 @pytest.mark.unit
@@ -222,3 +231,5 @@ def test_CMA_SO_constructor_defaults():
 
     assert strategy.lambda_ == 5
     assert strategy.problem_size == 2
+    assert strategy.stopping_conditions[0].max_ngen == pytest.approx(
+        100 + 50 * 5 ** 2 / numpy.sqrt(5))

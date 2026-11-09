@@ -338,3 +338,39 @@ def test_arbsweepprotocol_response_is_a_time_series():
     )["soma.v"]
 
     assert numpy.all(numpy.diff(response["time"]) > 0)
+
+
+ONE_LABEL_BUG = (
+    "a recording location with a one-item label list is used as a single label"
+)
+
+
+def one_label_recording():
+    location = SimpleNamespace(acc_label=lambda: [locset("a").acc_label()])
+    return SimpleNamespace(location=location, name="soma.v")
+
+
+@pytest.mark.unit
+@pytest.mark.xfail(raises=AttributeError, strict=True, reason=ONE_LABEL_BUG)
+def test_instantiate_locations_accepts_a_recording_on_one_label():
+    protocol = protocols.ArbSweepProtocol(
+        "step", stimuli=[], recordings=[one_label_recording()]
+    )
+
+    labels = protocol.instantiate_locations(arbor.label_dict())
+
+    assert "a" in labels.keys()
+
+
+@pytest.mark.unit
+@pytest.mark.xfail(raises=AttributeError, strict=True, reason=ONE_LABEL_BUG)
+def test_instantiate_recordings_accepts_a_recording_on_one_label():
+    protocol = protocols.ArbSweepProtocol(
+        "step", stimuli=[], recordings=[one_label_recording()]
+    )
+    cell_model = mock.MagicMock()
+    cell_model.cable_cell.locations.return_value = ["only one"]
+
+    protocol.instantiate_recordings(cell_model)
+
+    cell_model.probe.assert_called_once()

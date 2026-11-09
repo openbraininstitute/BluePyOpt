@@ -14,6 +14,23 @@ import numpy
 import deap.tools
 
 
+def sentinel_map(function, *iterables):
+    """Map function that can be told apart from the DEAP toolbox default"""
+    return map(function, *iterables)
+
+
+@pytest.fixture
+def fake_scoop(monkeypatch):
+    """Fake the scoop module, which is not part of the test dependencies"""
+    futures = types.ModuleType("scoop.futures")
+    futures.map = sentinel_map
+    scoop = types.ModuleType("scoop")
+    scoop.futures = futures
+    monkeypatch.setitem(sys.modules, "scoop", scoop)
+    monkeypatch.setitem(sys.modules, "scoop.futures", futures)
+    return futures
+
+
 @pytest.mark.unit
 def test_DEAPOptimisation_constructor():
     "deapext.optimisation: Testing constructor DEAPOptimisation"
@@ -127,35 +144,38 @@ def test_DEAPOptimisation_zero_params():
 
 
 @pytest.mark.unit
-def test_DEAPOptimisation_scoop_with_map_function():
+def test_DEAPOptimisation_scoop_with_map_function(fake_scoop):
     "deapext.optimisation: scoop and map_function are exclusive"
 
     simplecell = bluepyopt.ephys.examples.simplecell.SimpleCell()
 
-    pytest.raises(
-        Exception,
-        bluepyopt.deapext.optimisations.DEAPOptimisation,
-        simplecell.cell_evaluator,
-        use_scoop=True,
-        map_function=map)
+    with pytest.raises(Exception, match="Impossible to use scoop"):
+        bluepyopt.deapext.optimisations.DEAPOptimisation(
+            simplecell.cell_evaluator,
+            use_scoop=True,
+            map_function=map)
 
 
 @pytest.mark.unit
-def test_DEAPOptimisation_scoop(monkeypatch):
+def test_DEAPOptimisation_scoop(fake_scoop):
     "deapext.optimisation: scoop futures registered as map"
-
-    futures = types.ModuleType("scoop.futures")
-    futures.map = map
-    scoop = types.ModuleType("scoop")
-    scoop.futures = futures
-    monkeypatch.setitem(sys.modules, "scoop", scoop)
-    monkeypatch.setitem(sys.modules, "scoop.futures", futures)
 
     simplecell = bluepyopt.ephys.examples.simplecell.SimpleCell()
     optimisation = bluepyopt.deapext.optimisations.DEAPOptimisation(
         simplecell.cell_evaluator, use_scoop=True)
 
-    assert optimisation.toolbox.map.func == map
+    assert optimisation.toolbox.map.func is sentinel_map
+
+
+@pytest.mark.unit
+def test_DEAPOptimisation_map_function():
+    "deapext.optimisation: provided map_function registered as map"
+
+    simplecell = bluepyopt.ephys.examples.simplecell.SimpleCell()
+    optimisation = bluepyopt.deapext.optimisations.DEAPOptimisation(
+        simplecell.cell_evaluator, map_function=sentinel_map)
+
+    assert optimisation.toolbox.map.func is sentinel_map
 
 
 @pytest.mark.unit

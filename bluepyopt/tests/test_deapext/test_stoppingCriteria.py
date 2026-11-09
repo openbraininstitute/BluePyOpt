@@ -83,6 +83,45 @@ def test_Stagnation():
 
 
 @pytest.mark.unit
+@pytest.mark.parametrize("best, median", [
+    (numpy.linspace(2.0, 1.0, 200), numpy.linspace(2.0, 1.0, 200)),
+    (numpy.linspace(2.0, 1.0, 200), [1.0] * 200),
+    ([1.0] * 200, numpy.linspace(2.0, 1.0, 200)),
+])
+def test_Stagnation_not_met_while_improving(best, median):
+    """deapext.stoppingCriteria: Stagnation needs best and median to stall"""
+
+    criteria = bluepyopt.deapext.stoppingCriteria.Stagnation(
+        lambda_=4, problem_size=2)
+    criteria.best = list(best)
+    criteria.median = list(median)
+
+    criteria.check(
+        {"gen": 1, "population": make_population(1.0, 2.0, 3.0, 4.0)})
+
+    assert criteria.criteria_met is False
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("best", [
+    # improving by more than the threshold, slowly enough not to look noisy
+    numpy.linspace(1.1, 1.0, 200),
+    [1.0] * 180 + [0.5, 1.5] * 10,
+])
+def test_Stagnationv2_not_met_while_improving_or_noisy(best):
+    """deapext.stoppingCriteria: Stagnationv2 needs a flat, quiet history"""
+
+    criteria = bluepyopt.deapext.stoppingCriteria.Stagnationv2(
+        lambda_=4, problem_size=2)
+    criteria.best = list(best)
+
+    criteria.check(
+        {"gen": 1, "population": make_population(1.0, 2.0, 3.0, 4.0)})
+
+    assert criteria.criteria_met is False
+
+
+@pytest.mark.unit
 def test_Stagnationv2():
     """deapext.stoppingCriteria: Testing Stagnationv2"""
 
